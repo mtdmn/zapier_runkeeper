@@ -3,7 +3,7 @@
 var Zap = {
     activity_post_poll: function(bundle) {
       /* 
-      Argument:
+    Argument:
       bundle.response.status_code: <integer>
       bundle.response.headers: <object>
       bundle.response.content: <str>
@@ -16,14 +16,15 @@ var Zap = {
       bundle.zap: <object> # info about the zap
       bundle.meta: <object> # extra runtime information you can use
 
-      The response should be JSON serializable:
+    The response should be JSON serializable:
       [
         <object>, # with unique 'id' key
         <object> # with unique 'id' key
       ]
-      */
+    */
         var response = bundle.response;
         var results = JSON.parse(bundle.response.content);
+        var activities = [];
         _.each(results.items, function(result) {
             console.log('uri: ' + result.uri);
             var request2 = {
@@ -38,12 +39,11 @@ var Zap = {
             // perform synchronously
             var response2 = z.request(request2);
             console.log('Status: ' + response2.status_code);
-            console.log('Headers: ' + JSON.stringify(response2.headers));
-            console.log('Content/Body: ' + response2.content);            
+            activities.push(JSON.parse(response2.content));            
 
         })
-
-        return results;
+        
+        return activities;
     },
 
     activity_pre_poll: function(bundle) {
@@ -51,5 +51,5 @@ var Zap = {
         request.headers.Accept = 'application/vnd.com.runkeeper.FitnessActivityFeed+json';
 
         return request;
-    }
+    }  
 };
