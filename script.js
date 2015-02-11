@@ -33,12 +33,15 @@ GpxParser.prototype = {
         var trk = "<trk>";
         trk += "<name>runkeeper activity via zapier</name>";
         trk += "<trkseg>";
-        _.each(this.path, function(point) {
+        var date = new Date();
+        _.each(this.path, function(point) {        
+            var offset = this.startTime.getTime() + point.timestamp * 1000;
+            date.setTime(offset);
             trk += "<trkpt";
             trk += " lon='" + point.longitude + "'";
             trk += " lat='" + point.latitude + "'" + ">";
             trk += " <ele>" + point.altitude + "</ele>";
-  //          trk += " <time>" + getAbsTimeStr(point.time, this.startTime.getTime()) + "</time>";
+            trk += " <time>" + date.toISOString() + "</time>";
         /*
         <extensions>
           <gpxtpx:TrackPointExtension>
@@ -47,7 +50,7 @@ GpxParser.prototype = {
         </extensions>
         */
             trk += "</trkpt>";
-        });
+        }, this);
         trk += "</trkseg>";
         trk += "</trk>";
         var footer = '</gpx>';
