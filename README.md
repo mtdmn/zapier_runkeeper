@@ -1,4 +1,4 @@
-# script for zapier app for runkeeper.
+# zapier app script for runkeeper activity synchronization.
 
 Put this script into the scripting part of zapier app development.
 
