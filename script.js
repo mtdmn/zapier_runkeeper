@@ -12,6 +12,7 @@ function GpxParser () {
      //2015-01-11T01:40:33.000Z
      this.startTime = "";
      this.path = "";
+     this.type = "";
 }
 
 GpxParser.prototype = {
@@ -20,6 +21,11 @@ GpxParser.prototype = {
         var start_offset = this.startTime.getTime() - json.utc_offset * 60 * 60 * 1000;
         this.startTime.setTime(start_offset);
         this.path = json.path;
+        this.type = json.type;
+    },
+    
+    getType: function() {
+        return this.type;
     },
     
     dump: function () {
@@ -29,7 +35,14 @@ GpxParser.prototype = {
             var offset = startTime + secFromStart * 1000;
             return date.setTime(offset).toISOString();
         }
-        var header = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="runkeeper zapier app" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><metadata><link href="www.zapier.com"><text>zapier</text></link><time>'+this.startTime.toISOString()+'</time></metadata>';
+        var header = '<?xml version="1.0" encoding="UTF-8"?>\r\n'+
+            '<gpx version="1.1" creator="runkeeper zapier app" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 \r\n'+
+            'http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 \r\n' +
+            'http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 \r\n' +
+            'http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" xmlns="http://www.topografix.com/GPX/1/1" \r\n' +
+            'xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" \r\n'+
+            'xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\r\n' +
+            '<metadata><link href="www.zapier.com"><text>zapier</text></link><time>'+this.startTime.toISOString()+'</time></metadata>';
         var trk = "<trk>";
         trk += "<name>runkeeper activity via zapier</name>";
         trk += "<trkseg>";
@@ -49,7 +62,7 @@ GpxParser.prototype = {
           </gpxtpx:TrackPointExtension>
         </extensions>
         */
-            trk += "</trkpt>";
+            trk += "</trkpt>\r\n";
         }, this);
         trk += "</trkseg>";
         trk += "</trk>";
@@ -99,13 +112,12 @@ var Zap = {
             // perform synchronously
             var response2 = z.request(request2);
             console.log('Status: ' + response2.status_code);
-  //          activities.items.push(JSON.parse(response2.content));    
-            
+    
             // json to GPX conversion
             var gpxp = new GpxParser();
             gpxp.setJson(JSON.parse(response2.content));
             var gpx = gpxp.dump();
-            activities.items.push({"gpx": gpx});
+            activities.items.push({"gpx": gpx, "type": gpxp.getType()});
         });
         
 
@@ -117,8 +129,5 @@ var Zap = {
         request.headers.Accept = 'application/vnd.com.runkeeper.FitnessActivityFeed+json';
 
         return request;
-    },
-    
-    _dump_gpx: function(activity) {
-    }
+    }    
 };
